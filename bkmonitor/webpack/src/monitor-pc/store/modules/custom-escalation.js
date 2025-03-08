@@ -27,6 +27,7 @@ import {
   customTimeSeriesDetail,
   customTimeSeriesList,
   deleteCustomEventGroup,
+  customTSFields,
   deleteCustomTimeSeries,
   getCustomEventGroup,
   getCustomTimeSeriesLatestDataByFields,
@@ -56,6 +57,11 @@ const actions = {
   //  获取自定义指标详情
   async getCustomTimeSeriesDetail(_, params) {
     const data = await customTimeSeriesDetail(params).catch(() => ({}));
+    return data;
+  },
+  //  获取自定义指标详情
+  async getCustomTSFields(_, params) {
+    const data = await customTSFields(params).catch(() => ({}));
     return data;
   },
 

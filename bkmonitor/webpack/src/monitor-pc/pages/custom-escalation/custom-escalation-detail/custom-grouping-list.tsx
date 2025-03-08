@@ -23,7 +23,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-import { Component } from 'vue-property-decorator';
+import { Component, Prop } from 'vue-property-decorator';
 import { Component as tsc } from 'vue-tsx-support';
 
 import './custom-grouping-list.scss';
@@ -43,6 +43,9 @@ interface IMenuItem {
 
 @Component
 export default class CustomGroupingList extends tsc<any, any> {
+  @Prop({ default: () => [] }) groupList: IGroup[];
+  @Prop({ default: '' }) selectedLabel;
+
   menuList: IMenuItem[] = [
     {
       name: window.i18n.tc('编辑'),
@@ -53,20 +56,6 @@ export default class CustomGroupingList extends tsc<any, any> {
       name: window.i18n.tc('删除'),
       checked: false,
       id: 'delete',
-    },
-  ];
-  groupList: IGroup[] = [
-    {
-      name: '分组1',
-      metric_count: 23,
-    },
-    {
-      name: '分组2',
-      metric_count: 2,
-    },
-    {
-      name: '分组放大哈第三方和',
-      metric_count: 3,
     },
   ];
 
@@ -113,6 +102,11 @@ export default class CustomGroupingList extends tsc<any, any> {
   }
   // 拖拽 end
 
+  changeSelectedLabel(name: string) {
+    if (name === this.selectedLabel) return;
+    this.$emit('changeGroup', name);
+  }
+
   render() {
     return (
       <div class='custom-group'>
@@ -120,8 +114,13 @@ export default class CustomGroupingList extends tsc<any, any> {
           this.groupList.map((group, index) => (
             <div
               key={group.name}
-              class={['group', this.dragoverId === index.toString() ? 'is-dragover' : '']}
+              class={[
+                'group',
+                this.dragoverId === index.toString() ? 'is-dragover' : '',
+                this.selectedLabel === group.name ? 'group-selected' : '',
+              ]}
               draggable={true}
+              onClick={() => this.changeSelectedLabel(group.name)}
               onDragleave={this.handleDragleave}
               onDragover={e => this.handleDragover(index, e)}
               onDragstart={e => this.handleDragstart(index, e)}
@@ -155,7 +154,7 @@ export default class CustomGroupingList extends tsc<any, any> {
                     <span
                       key={item.id}
                       class={`more-list-item ${item.id}`}
-                      onClick={() => this.handleMenuClick(item)}
+                      onClick={() => this.handleMenuClick()}
                     >
                       {item.name}
                     </span>

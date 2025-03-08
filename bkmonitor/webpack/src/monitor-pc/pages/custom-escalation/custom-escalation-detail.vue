@@ -208,157 +208,8 @@
           </div>
         </div>
         <!-- 自定义事件展示 -->
-        <template v-if="type === 'customEvent'">
-          <!-- 拉取的事件列表 -->
-          <div
-            class="detail-information detail-list"
-            v-bkloading="{ isLoading: eventDataLoading }"
-          >
-            <div class="list-header">
-              <div class="list-header-title">
-                {{ $t('事件列表') }}
-              </div>
-              <bk-button
-                class="list-header-immediately"
-                v-bk-tooltips="{
-                  content: $tc('刷新'),
-                }"
-                icon="icon-monitor icon-mc-alarm-recovered"
-                @click="() => handleRefreshNow(true)"
-              />
-              <bk-select
-                class="list-header-refresh"
-                v-model="refreshList.value"
-                :clearable="false"
-                @change="handleRefreshChange"
-              >
-                <bk-option
-                  v-for="(opt, index) in refreshList.list"
-                  :id="opt.value"
-                  :key="index"
-                  :name="opt.name"
-                />
-              </bk-select>
-              <bk-select
-                class="list-header-date"
-                v-model="shortcuts.value"
-                :clearable="false"
-                :popover-min-width="110"
-                @change="handleTimeChange"
-              >
-                <bk-option
-                  v-for="(opt, index) in shortcuts.list"
-                  :id="opt.value"
-                  :key="index"
-                  :name="opt.name"
-                />
-              </bk-select>
-            </div>
-            <bk-table
-              class="custom-event-table"
-              :data="eventData"
-              :height="tableVirtualRenderHeight"
-              :outer-border="false"
-              row-key="custom_event_id"
-              virtual-render
-            >
-              <bk-table-column
-                :label="$t('事件名称')"
-                min-width="100"
-                prop="custom_event_name"
-              />
-              <bk-table-column
-                :label="$t('目标数量')"
-                min-width="50"
-              >
-                <template #default="{ row }">
-                  <div class="num-set">
-                    {{ row.target_count }}
-                  </div>
-                </template>
-              </bk-table-column>
-              <bk-table-column
-                :label="$t('事件数量')"
-                min-width="50"
-              >
-                <template #default="{ row }">
-                  <div class="num-set">
-                    {{ row.event_count }}
-                  </div>
-                </template>
-              </bk-table-column>
-              <bk-table-column
-                :label="$t('关联策略')"
-                min-width="50"
-              >
-                <template #default="{ row }">
-                  <span
-                    :class="['num-set', { 'col-btn': row.related_strategies.length > 0 }]"
-                    @click="handleGotoStrategy(row)"
-                  >
-                    {{ row.related_strategies.length }}
-                  </span>
-                  <!-- <div class="num-set"> {{ row.related_strategies.length }}</div> -->
-                </template>
-              </bk-table-column>
-              <bk-table-column
-                :label="$t('最近变更时间')"
-                min-width="100"
-              >
-                <template #default="{ row }">
-                  <span>{{ row.last_change_time || '--' }}</span>
-                </template>
-              </bk-table-column>
-              <bk-table-column
-                :label="$t('操作')"
-                min-width="80"
-              >
-                <template #default="{ row }">
-                  <bk-button
-                    ext-cls="col-operator"
-                    theme="primary"
-                    text
-                    @click="handleOpenSideslider(row.last_event_content, row.custom_event_name)"
-                  >
-                    {{ $t('查看原始数据') }}
-                  </bk-button>
-                  <bk-button
-                    ext-cls="col-operator"
-                    theme="primary"
-                    text
-                    @click="handleAddStrategy(row)"
-                  >
-                    {{ $t('添加策略') }}
-                  </bk-button>
-                </template>
-              </bk-table-column>
-            </bk-table>
-          </div>
-          <!-- 查看原始数据侧滑栏 -->
-          <bk-sideslider
-            :is-show.sync="sideslider.isShow"
-            :quick-close="true"
-            :width="656"
-          >
-            <div
-              class="sideslider-title"
-              slot="header"
-            >
-              <span>{{ sideslider.title + $t(' - 原始数据') }}</span>
-              <span class="title-explain">{{ $t('（仅支持查看当前事件中最近一条的原始数据信息）') }}</span>
-            </div>
-            <div slot="content">
-              <monaco-editor
-                style="height: calc(100vh - 61px)"
-                :language="'json'"
-                :options="{ readOnly: true }"
-                :value="JSON.stringify(sideslider.data, null, '\t')"
-              />
-            </div>
-          </bk-sideslider>
-        </template>
         <!-- 自定义指标展示 -->
-        <template v-else>
+        <template>
           <div class="detail-information detail-list">
             <div class="list-header mb16">
               <div class="list-header-title">
@@ -1537,8 +1388,6 @@ export default class CustomEscalationDetail extends Mixins(authorityMixinCreate(
 
       [this.proxyInfo] = data; // 云区域展示数据
       [, this.detailData] = data;
-      console.log('data = = = >>', data);
-      console.log('detailData = = = >>', JSON.parse(JSON.stringify(this.detailData)));
       this.updateNavData(`${this.$t('查看')} ${this.detailData.name}`);
       if (this.type === 'customTimeSeries') {
         [, , this.unitList] = data; // 单位list
@@ -1716,16 +1565,6 @@ export default class CustomEscalationDetail extends Mixins(authorityMixinCreate(
           labels: [],
         })
       );
-      const item = {
-        name: 'zs',
-        title: 'ls',
-      };
-      this.metricData = [{
-          ...item,
-          selection: false,
-          descReValue: false,
-          labels: [],
-        }];
       this.setMetricDataLabels();
       this.pagination.total = this.metricData.length;
       if (!this.metricData.length) {

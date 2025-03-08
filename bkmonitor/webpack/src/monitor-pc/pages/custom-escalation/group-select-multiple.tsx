@@ -111,6 +111,7 @@ export default class GroupSelectMultiple extends tsc<IProps> {
   }
 
   render() {
+    console.log('render', this.list, this.$slots);
     return (
       <span
         class='group-select-multiple-component'
