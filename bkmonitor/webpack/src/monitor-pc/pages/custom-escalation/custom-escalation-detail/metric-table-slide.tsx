@@ -54,6 +54,7 @@ export default class IndicatorTableSlide extends tsc<any, any> {
 
   @Ref() metricSliderPopover: any;
 
+  inputFocus = -1;
   emitIsShow = false;
   loading = false;
   width = 1400;
@@ -341,8 +342,11 @@ export default class IndicatorTableSlide extends tsc<any, any> {
     const descriptionSlot = {
       /* 别名 */ default: props => (
         <bk-input
+          class={['slider-input', this.inputFocus === props.$index ? 'focus' : '']}
           v-model={props.row.description}
           value={props.row.description || props.row.name}
+          onBlur={() => (this.inputFocus = -1)}
+          onFocus={() => (this.inputFocus = props.$index)}
         />
       ),
     };
@@ -424,11 +428,11 @@ export default class IndicatorTableSlide extends tsc<any, any> {
       /* 操作 */ default: props => (
         <div>
           <i
-            class='icon-monitor icon-double-up'
+            class='bk-icon icon-plus-circle-shape set-icon'
             onClick={() => this.handClickRow(props, 'add')}
           />
           <i
-            class='icon-monitor icon-double-down'
+            class='bk-icon icon-minus-circle-shape set-icon'
             onClick={() => this.handClickRow(props, 'del')}
           />
         </div>
@@ -441,7 +445,7 @@ export default class IndicatorTableSlide extends tsc<any, any> {
         ref='strategyTable'
         class='slider-table'
         v-bkloading={{ isLoading: this.table.loading }}
-        // col-border={true}
+        col-border={true}
         empty-text={this.$t('无数据')}
         max-height={474}
         // on={{

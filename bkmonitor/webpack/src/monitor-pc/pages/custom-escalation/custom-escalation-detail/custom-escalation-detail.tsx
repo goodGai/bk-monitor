@@ -33,6 +33,7 @@ import {
   validateCustomEventGroupLabel,
   validateCustomTsGroupLabel,
 } from 'monitor-api/modules/custom_report';
+import { deepClone } from 'monitor-common/utils';
 
 import CommonNavBar from '../../../pages/monitor-k8s/components/common-nav-bar';
 import { SET_NAV_ROUTE_LIST } from '../../../store/modules/app';
@@ -225,7 +226,7 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
 
   //  维度数量
   get dimensionNum() {
-    return this.metricData.filter(item => item.monitor_type === 'dimension').length;
+    return this.dimensions.length;
   }
 
   // 未分组数量
@@ -391,6 +392,7 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
       [this.proxyInfo] = data; // 云区域展示数据
       [, this.detailData = this.detailData] = data;
       [, , metricData] = data;
+      console.log('api返回', metricData);
       if (this.type === 'customTimeSeries') {
         [, , , this.unitList] = data; // 单位list
         const allUnitList = [];
@@ -460,13 +462,14 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
   handleDetailData(detailData: IDetailData) {
     if (this.type === 'customTimeSeries') {
       this.tableId = detailData.table_id;
-      this.metricData = detailData.metric_json[0].fields.map(item =>
+      this.metricData = this.metricList.map(item =>
       // item.label === undefined && this.$set(item, 'label', '');
       ({
         ...item,
         selection: false,
         descReValue: false,
-        labels: [],
+        // labels: [],
+        monitor_type: 'metric',
       })
       );
       this.setMetricDataLabels();
