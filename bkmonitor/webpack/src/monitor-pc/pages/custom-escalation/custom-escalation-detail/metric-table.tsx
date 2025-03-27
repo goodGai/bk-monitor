@@ -88,7 +88,7 @@ export default class IndicatorTable extends tsc<any, any> {
   @Prop({ default: () => [], type: Array }) groupSelectList: IListItem[];
   @Prop({ default: () => [], type: Array }) value: string[];
   @Prop({ default: () => [], type: Array }) dimensionTable;
-  @Prop({ default: () => {} }) allDataPreview;
+  @Prop({ default: () => { } }) allDataPreview;
   @Prop({ default: 0 }) allCheckValue;
   @Prop({ default: () => [] }) cycleOption: [];
   @Prop({ default: () => new Map(), type: Map }) groupsMap: Map<string, any>;
@@ -313,7 +313,7 @@ export default class IndicatorTable extends tsc<any, any> {
     );
   }
 
-  getGroupCpm(row, index) {
+  getGroupCpm(row, index, showFoot = true) {
     return (
       <bk-select
         autoHeight={false}
@@ -332,11 +332,11 @@ export default class IndicatorTable extends tsc<any, any> {
               !this.getIsDisable(row.name, item.id)
                 ? { disabled: true }
                 : {
-                    content: this.$t('由匹配规则{0}生成', [this.getDisableTip(row.name, item.id)]),
-                    placements: ['right'],
-                    boundary: 'window',
-                    allowHTML: false,
-                  }
+                  content: this.$t('由匹配规则{0}生成', [this.getDisableTip(row.name, item.id)]),
+                  placements: ['right'],
+                  boundary: 'window',
+                  allowHTML: false,
+                }
             }
             disabled={this.getIsDisable(row.name, item.id)}
             name={item.name}
@@ -344,7 +344,7 @@ export default class IndicatorTable extends tsc<any, any> {
             {item.name}
           </bk-option>
         ))}
-        {
+        {showFoot && (
           <div
             class='edit-group-manage'
             slot='extension'
@@ -353,7 +353,7 @@ export default class IndicatorTable extends tsc<any, any> {
             <i class='icon-monitor icon-jia' />
             <span>{this.$t('新建分组')}</span>
           </div>
-        }
+        )}
       </bk-select>
     );
   }
@@ -562,7 +562,7 @@ export default class IndicatorTable extends tsc<any, any> {
   }
 
   @Emit('rowCheck')
-  handleRowCheck() {}
+  handleRowCheck() { }
 
   handleCheckChange({ value }) {
     this.updateAllSelection(value === 2);
@@ -746,7 +746,7 @@ export default class IndicatorTable extends tsc<any, any> {
                   class='info-content'
                   onClick={() => this.handleShowEditDescription(metricData.description)}
                 >
-                  {metricData.description ?? '-'}
+                  {metricData.description || '-'}
                 </div>
               ) : (
                 <bk-input
@@ -875,7 +875,7 @@ export default class IndicatorTable extends tsc<any, any> {
                       ))}
                     </div>
                   ) : (
-                    <div class='table-dimension-select'>{this.$t('-')}</div>
+                    <div class='table-dimension-select'>{'-'}</div>
                   )}
                 </div>
               ) : (
