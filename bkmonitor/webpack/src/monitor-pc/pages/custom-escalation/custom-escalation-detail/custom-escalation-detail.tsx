@@ -179,6 +179,8 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
     dataLabel: false,
   };
 
+  nonGroupNum = 0;
+
   get computedWidth() {
     return window.innerWidth < 2560 ? 960 : 1200;
   }
@@ -203,11 +205,6 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
   //  维度数量
   get dimensionNum() {
     return this.dimensions.length;
-  }
-
-  // 未分组数量
-  get nonGroupNum() {
-    return this.metricData.filter(item => item.monitor_type === 'metric').filter(item => !item.labels.length).length;
   }
 
   // 上报周期
@@ -279,11 +276,23 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
     return filterList;
   }
 
+
+  // 获取未分组数量
+  getNonGroupNum() {
+    return this.metricData.filter(item => item.monitor_type === 'metric').filter(item => !item.labels.length).length;
+  }
+
   /** 处理导出 */
   handleExportMetric() {
     // 构建JSON内容
     const dimensions = this.dimensions.length
-      ? this.dimensions
+      ? this.dimensions.map(({ name, type, description, disabled, common }) => ({
+        name,
+        type,
+        description,
+        disabled,
+        common,
+      }))
       : [
         {
           name: 'dimension1',
@@ -294,7 +303,33 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
         },
       ];
     const metrics = this.metricData.length
-      ? this.metricData
+      ? this.metricData.map(
+        ({
+          name,
+          type,
+          description,
+          disabled,
+          unit,
+          hidden,
+          aggregate_method,
+          interval,
+          label,
+          dimensions,
+          function: func,
+        }) => ({
+          type,
+          name,
+          description,
+          disabled,
+          unit,
+          hidden,
+          aggregate_method,
+          interval,
+          label,
+          dimensions,
+          function: func,
+        })
+      )
       : [
         {
           name: 'metric1',
@@ -365,6 +400,7 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
   created() {
     this.getDetailData();
     this.handleGetMetricFunctions();
+    this.nonGroupNum = this.getNonGroupNum();
   }
 
   updateAllSelection(v = false) {
@@ -429,8 +465,6 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
           } ${this.detailData.name}`;
         this.metricList = metricData?.metrics || [];
         this.dimensions = metricData?.dimensions || [];
-        // this.metricList =
-        //   this.detailData.metric_json?.[0]?.fields?.filter(item => item.monitor_type === 'metric') || [];
 
         // 获取表格内的单位数据
         const tempSet = new Set();
@@ -460,9 +494,6 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
         ];
 
         await this.getGroupList();
-      } else {
-        title = `${this.$tc('route-' + '自定义事件').replace('route-', '')} - #${this.detailData.bk_event_group_id} ${this.detailData.name
-          }`;
       }
       this.$store.commit('app/SET_NAV_TITLE', title);
       this.handleDetailData(this.detailData);
@@ -495,15 +526,7 @@ export default class CustomEscalationDetailNew extends tsc<any, any> {
     this.copyDataLabel = this.detailData.data_label || '';
     this.copyDescribe = this.detailData.desc || '';
     this.copyIsPlatform = this.detailData.is_platform ?? false;
-    const str =
-      this.type === 'customEvent'
-        ? `# ${this.$t('事件标识名，最大长度128')}
-                "event_name": "input_your_event_name",
-                "event": {
-                    # ${this.$t('事件内容，必需项')}
-                    "content": "user xxx login failed"
-                },`
-        : `# ${this.$t('指标，必需项')}
+    const str = `# ${this.$t('指标，必需项')}
         "metrics": {
             "cpu_load": 10
         },`;
@@ -1185,6 +1208,7 @@ registry=registry, handler=bk_handler) # 上述自定义 handler`;
       ...item,
       manualList: this.groupsMap.get(item.name)?.manualList || [],
     }));
+    this.nonGroupNum = this.getNonGroupNum();
   }
 
   /** 批量更新 */
